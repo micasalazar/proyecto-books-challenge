@@ -20,7 +20,7 @@ module.exports = (sequelize, dataTypes) => {
   };
   let config = {
     tableName: 'books',
-    timestamps: false
+    timestamps: false   
   };
   const Book = sequelize.define(alias, cols, config);
 
@@ -28,7 +28,7 @@ module.exports = (sequelize, dataTypes) => {
     Book.belongsToMany(models.Author, {
       as: 'authors',
       through: 'BooksAuthors',
-      foreingKey: 'BookId',
+      foreignKey: 'BookId',
       otherKey: 'AuthorId',
       timestamps: false
     });

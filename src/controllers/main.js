@@ -13,7 +13,7 @@ const mainController = {
       .catch((error) => console.log(error));
   },
   bookDetail: async (req, res) => {
-     // Implement look for details in the database
+     
     try{
       const bookFinded = await db.Book.findByPk(req.params.id, {
         include: [{
@@ -35,7 +35,7 @@ const mainController = {
     res.render('search', { books: [] });
   },
   bookSearchResult: async (req, res) => {
-    // Implement search by title
+    
     try{
       const {title} = req.body;
       if(!title){
@@ -56,9 +56,28 @@ const mainController = {
       res.status(500).send('Error de servidor')
     }  
   },
-  deleteBook: (req, res) => {
-    // Implement delete book
-    res.render('home');
+  deleteBook: async (req, res) => {    
+    try {
+      await db.sequelize.query('DELETE FROM BooksAuthors WHERE BookId = :bookId', {
+        replacements: { bookId: req.params.id },
+        type: db.sequelize.QueryTypes.DELETE,
+      });
+      const deleteBook = await db.Book.destroy({
+        where: { id: req.params.id },
+      });
+      
+      console.log('Resultado de la eliminación:', deleteBook);
+      
+      if (deleteBook) {
+        res.redirect('/');
+      } else {
+          res.status(404).send('Libro no encontrado');
+      }
+  } catch (error) {
+      console.error('Error al intentar borrar el libro y sus relaciones', error);
+      res.status(500).send('Error de servidor');
+  }
+  
   },
   authors: (req, res) => {
     db.Author.findAll()
@@ -68,7 +87,7 @@ const mainController = {
       .catch((error) => console.log(error));
   },
   authorBooks: async (req, res) => {
-    // Implement books by author
+   
     try{
       const authorById = req.params.id;
       const author = await db.Author.findByPk(authorById, {
@@ -102,14 +121,14 @@ const mainController = {
   },
   login: (req, res) => {
     // Implement login process
-    res.render('login');
+    return res.render('login');
   },
-  processLogin: (req, res) => {
-    // Implement login process
+  processLogin: async (req, res) => {
+    const userToLogin = await db.User.findByField('email', req.body.email) 
+    
     res.render('home');
   },
-  edit: async(req, res) => {
-    // Implement edit book
+  edit: async(req, res) => {   
     try{
       const book = await db.Book.findByPk(req.params.id);
       if(!book){
@@ -123,7 +142,7 @@ const mainController = {
     
   },
   processEdit: async (req, res) => {
-    // Implement edit book
+   
     try{
       const {title, cover, description}=req.body;
       const bookId = req.params.id;
