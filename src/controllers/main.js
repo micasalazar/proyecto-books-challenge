@@ -108,13 +108,42 @@ const mainController = {
     // Implement login process
     res.render('home');
   },
-  edit: (req, res) => {
+  edit: async(req, res) => {
     // Implement edit book
-    res.render('editBook', {id: req.params.id})
+    try{
+      const book = await db.Book.findByPk(req.params.id);
+      if(!book){
+        return res.status(404).send('Libro no encontrado')
+      }
+      res.render('editBook',{book})
+    }catch(error){
+      console.error('Error al intentar editar un libro ' + error)
+      res.status(500).send('Error de Servidor')
+    }
+    
   },
-  processEdit: (req, res) => {
+  processEdit: async (req, res) => {
     // Implement edit book
-    res.render('home');
+    try{
+      const {title, cover, description}=req.body;
+      const bookId = req.params.id;
+
+      const updateBook = await db.Book.update(
+        {title, cover, description},
+        {where: {id: bookId}}
+      );
+      if(updateBook){
+        res.render('home');        
+      }else{
+        res.status(404).send('Libro no encontrado')
+      }
+    }catch(error){
+      console.error('Error al intentar editar el libro ' + error)
+      res.status(500).send('Error de Servidor')
+    }
+    
+    
+
   }
 };
 
