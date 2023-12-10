@@ -11,8 +11,14 @@
     </ul>
 
     <div class="col-md-3 text-end">
-      <a href="/users/login" class="btn btn-outline-primary me-2">Login</a>
-      <a href="/users/register" class="btn btn-outline-primary me-2">Sign-up</a>
+      <% if (userLogueado) { %>
+        <form action="/users/logout" method="GET" class="d-flex">
+          <button type="submit" class="btn btn-outline-primary me-2">Logout</button>
+        </form>
+        <% } else { %>
+          <a href="/users/login" class="btn btn-outline-primary me-2">Login</a>
+          <a href="/users/register" class="btn btn-outline-primary me-2">Sign-up</a>
+          <% } %>
     </div>
   </header>
 </div>

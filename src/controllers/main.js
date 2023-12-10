@@ -8,7 +8,7 @@ const mainController = {
       include: [{ association: 'authors' }]
     })
       .then((books) => {
-        res.render('home', { books });
+        res.render('home', { books, userLogueado: req.session.userLogueado  });
       })
       .catch((error) => console.log(error));
   },
@@ -122,33 +122,37 @@ const mainController = {
   login: (req, res) => {
     // Implement login process
     return res.render('login', { userLogueado: req.session.userLogueado });
+
   },
-  processLogin: async (req, res) => {    
-      try {
-        const userLogin = await db.User.findOne({
-          where: { email: req.body.email }
-        });
+  processLogin: async (req, res) => {
+    try {
+      const userLogin = await db.User.findOne({
+        where: { email: req.body.email }
+      });
     
-        if (userLogin) {
-          let passwordOk = bcryptjs.compareSync(req.body.password, userLogin.Pass);
-          if (passwordOk) {
+      if (userLogin) {
+        let passwordOk = bcryptjs.compareSync(req.body.password, userLogin.Pass);
+
+        if (passwordOk) {
             // delete userLogin.pass;             
-            req.session.userLogueado = userLogin.id;
-        res.cookie("email", req.body.email, { maxAge: (4000 * 60) * 10 });
-        return res.redirect('/');
-      } else {
-        console.log('Contraseña incorrecta');
-       
-        return res.render('login', { error: 'Contraseña incorrecta' });
-      }
-    } else {      
-      console.log('Usuario no encontrado');
-      return res.render('login', { error: 'Usuario no encontrado' });
-    }
-  } catch (error) {
-    console.error('Error al procesar el inicio de sesión ' + error);
-    res.status(500).send('Error del Servidor');
-  }
+            req.session.userLogueado = {
+              id: userLogin.id,
+            };
+            res.cookie("email", req.body.email, { maxAge: (4000 * 60) * 10 });
+
+            return res.redirect('/');
+          } else {
+            console.log('Contraseña incorrecta');
+            return res.render('login', { error: 'Contraseña incorrecta' });
+          }
+        } else {
+          console.log('Usuario no encontrado');
+          return res.render('login', { error: 'Usuario no encontrado' });
+        }
+      } catch (error) {
+        console.error('Error al procesar el inicio de sesión ' + error);
+        res.status(500).send('Error del Servidor');
+      }      
 },
 logout: (req, res) =>{
   req.session.destroy();
