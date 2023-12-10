@@ -121,13 +121,41 @@ const mainController = {
   },
   login: (req, res) => {
     // Implement login process
-    return res.render('login');
+    return res.render('login', { userLogueado: req.session.userLogueado });
   },
-  processLogin: async (req, res) => {
-    const userToLogin = await db.User.findByField('email', req.body.email) 
+  processLogin: async (req, res) => {    
+      try {
+        const userLogin = await db.User.findOne({
+          where: { email: req.body.email }
+        });
     
-    res.render('home');
-  },
+        if (userLogin) {
+          let passwordOk = bcryptjs.compareSync(req.body.password, userLogin.Pass);
+          if (passwordOk) {
+            // delete userLogin.pass;             
+            req.session.userLogueado = userLogin.id;
+        res.cookie("email", req.body.email, { maxAge: (4000 * 60) * 10 });
+        return res.redirect('/');
+      } else {
+        console.log('Contraseña incorrecta');
+       
+        return res.render('login', { error: 'Contraseña incorrecta' });
+      }
+    } else {      
+      console.log('Usuario no encontrado');
+      return res.render('login', { error: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al procesar el inicio de sesión ' + error);
+    res.status(500).send('Error del Servidor');
+  }
+},
+logout: (req, res) =>{
+  req.session.destroy();
+  res.clearCookie("email")
+  return res.redirect('/');
+
+},
   edit: async(req, res) => {   
     try{
       const book = await db.Book.findByPk(req.params.id);

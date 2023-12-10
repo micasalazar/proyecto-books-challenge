@@ -1,8 +1,14 @@
 const express = require('express');
 const mainRouter = require('./routes/main');
 const methodOverride = require('method-override');
+const session = require('express-session');
 
 const app = express();
+app.use(session({
+  secret: 'un_secreto',
+  resave: false,
+  saveUninitialized: true
+}));
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());

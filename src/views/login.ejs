@@ -53,7 +53,16 @@
               <hr class="mx-n3">
   
               <div class="px-5 py-4">
-                <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                <% if(userLogueado){%>
+                  <form action="/users/logout" method="GET">
+                    <button type="submit" class="btn btn-primary btn-lg">LoginOut</button>
+                  </form>
+                  <% }else {%>
+                    <form action="/users/login" method="POST">
+                      <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                    </form>
+                    <% } %>
+
               </div>
   
             </div>
