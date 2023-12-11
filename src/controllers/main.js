@@ -22,7 +22,7 @@ const mainController = {
         }]
       })
       if(bookFinded){
-        res.render('bookDetail', {book: bookFinded});        
+        res.render('bookDetail', {book: bookFinded, userLogueado: req.session.userLogueado});        
       }else{
         res.status(404).send('Book not Found!')
       }
@@ -32,7 +32,7 @@ const mainController = {
     }   
   },
   bookSearch: (req, res) => {
-    res.render('search', { books: [] });
+    res.render('search', { books: [], userLogueado: req.session.userLogueado });
   },
   bookSearchResult: async (req, res) => {
     
@@ -50,7 +50,7 @@ const mainController = {
         include:[{association: 'authors'}]
       });
       // console.log('Libros encontrados:', books)
-      res.render('search', {books})
+      res.render('search', {books,userLogueado: req.session.userLogueado  })
     }catch(error){
       console.error('Error al realizar la búsqueda ' + error);
       res.status(500).send('Error de servidor')
@@ -82,7 +82,7 @@ const mainController = {
   authors: (req, res) => {
     db.Author.findAll()
       .then((authors) => {
-        res.render('authors', { authors });
+        res.render('authors', { authors, userLogueado: req.session.userLogueado });
       })
       .catch((error) => console.log(error));
   },
@@ -94,7 +94,7 @@ const mainController = {
         include:[{ model: db.Book, as:'books', through:{attributes:[]}}]
       });
       if(author){
-        res.render('authorBooks', {author});
+        res.render('authorBooks', {author, userLogueado: req.session.userLogueado});
       }else{
         res.status(404).send('El autor no fuen encontrado')
       }
@@ -104,7 +104,7 @@ const mainController = {
     }
     },
   register: (req, res) => {
-    res.render('register');
+    res.render('register', { userLogueado: req.session.userLogueado });
   },
   processRegister: (req, res) => {
     db.User.create({
@@ -121,20 +121,21 @@ const mainController = {
   },
   login: (req, res) => {
     // Implement login process
+    
     return res.render('login', { userLogueado: req.session.userLogueado });
 
   },
   processLogin: async (req, res) => {
     try {
       const userLogin = await db.User.findOne({
-        where: { email: req.body.email }
+        where: { email: req.body.email } 
       });
     
       if (userLogin) {
         let passwordOk = bcryptjs.compareSync(req.body.password, userLogin.Pass);
 
         if (passwordOk) {
-            // delete userLogin.pass;             
+            delete userLogin.pass;             
             req.session.userLogueado = {
               id: userLogin.id,
             };
@@ -156,6 +157,7 @@ const mainController = {
 },
 logout: (req, res) =>{
   req.session.destroy();
+  console.log(req.session);
   res.clearCookie("email")
   return res.redirect('/');
 
@@ -166,7 +168,7 @@ logout: (req, res) =>{
       if(!book){
         return res.status(404).send('Libro no encontrado')
       }
-      res.render('editBook',{book})
+      res.render('editBook',{book, userLogueado: req.session.userLogueado})
     }catch(error){
       console.error('Error al intentar editar un libro ' + error)
       res.status(500).send('Error de Servidor')
