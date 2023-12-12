@@ -128,8 +128,8 @@ const mainController = {
   },
   processLogin: async (req, res) => { 
       try {
-        console.log(req.body);
-        console.log(req.session);
+        // console.log(req.body);
+        // console.log(req.session);
 
         const userEmail = req.body.email;
 
@@ -188,7 +188,7 @@ const mainController = {
 },
 logout: (req, res) =>{
   req.session.destroy();
-  console.log(req.session);
+  // console.log(req.session);
   res.clearCookie("email")
   return res.redirect('/');
 
@@ -208,37 +208,83 @@ logout: (req, res) =>{
     
   },
   processEdit: async (req, res) => {
-
-    try{
-      const bookFound = await db.Book.findOne({
-        where: { id: req.params.id },
-      });
+    
+    try {
+        console.log('Datos del formulario:', req.body);
       
+      const bookFound = await db.Book.findByPk(req.params.id);
+  
       if (bookFound) {
-        const updatedBook = await bookFound.update(
-          {
-            title: req.body.title,
-            cover: req.body.cover,
-            description: req.body.description,
-          },
-          { where: { id: req.params.id } }
-        );
-      
+        const updatedBook = await bookFound.update({
+          title: req.body.title,
+          cover: req.body.cover,
+          description: req.body.description,
+        });
+        console.log('Resultado de la actualización:', updatedBook);
+        console.log('QUE TIENE EL RER.BODY:', req.body);
+
+  
         if (updatedBook) {
-          res.redirect('/');
+          res.redirect('/books/detail/' + req.params.id);
         } else {
-          res.status(404).send('Libro no encontrado' + req.params.id);
+          res.status(404).send(`Libro no encontrado: ${req.params.id}`);
         }
       } else {
-        res.status(404).send('Libro no encontrado' + req.params.id);
+        res.status(404).send(`Libro no encontrado: ${req.params.id}`);
       }
+    } catch (error) {
+      console.error('Error al intentar editar el libro', error);
+      res.status(500).send('Error de Servidor');
+    }
+  
+    
+
+
+
+
+
+    // try{
+    //   const bookFound = await db.Book.findOne({
+    //     where: { id: req.params.id },
+    //   });
+      
+    //   if (bookFound) {
+    //     const updatedBook = await bookFound.update(
+    //       {
+    //         title: req.body.title,
+    //         cover: req.body.cover,
+    //         description: req.body.description,
+    //       },
+    //       { where: { id: req.params.id } }
+    //     );
+      
+    //     if (updatedBook) {
+    //       res.redirect(`/books/detail/${req.params.id}`);
+    //     } else {
+    //       res.status(404).send('Libro no encontrado' + req.params.id);
+    //     }
+    //   } else {
+    //     res.status(404).send('Libro no encontrado' + req.params.id);
+    //   }
       
 
-    }catch (error) {
-        console.error('Error al intentar editar el libro ' + error);
-        res.status(500).send('Error de Servidor');
+    // }catch (error) {
+    //     console.error('Error al intentar editar el libro ' + error);
+    //     res.status(500).send('Error de Servidor');
 
-    }
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
    
     // try {
     //   const { title, cover, description } = req.body;
