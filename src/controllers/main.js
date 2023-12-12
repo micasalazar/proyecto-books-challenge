@@ -1,3 +1,4 @@
+const {validationResult} = require('express-validator')
 const bcryptjs = require('bcryptjs');
 const db = require('../database/models');
 const {Op} = require('sequelize')
@@ -108,6 +109,13 @@ const mainController = {
     res.render('register', { usuarioALoguear:req.session.usuarioALoguear });
   },
   processRegister: (req, res) => {
+    const resultValidation = validationResult(req);
+
+    if (!resultValidation.isEmpty()) {
+      return res.render('register', {
+        errors: resultValidation.mapped(),
+      });
+    }
     db.User.create({
       Name: req.body.name,
       Email: req.body.email,
