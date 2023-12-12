@@ -2,10 +2,10 @@ const express = require('express');
 const mainRouter = require('./routes/main');
 const methodOverride = require('method-override');
 const session = require('express-session');
+const cookie = require('cookie-parser')
 
 const app = express();
 const userLoggedMiddleware = require('./middleware/userLoggedMiddleware');
-const cookie = require('cookie-parser')
 
 app.use(session({
   secret: 'un_secreto',

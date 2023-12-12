@@ -22,15 +22,20 @@
           </p>          
           <p class="lead mb-4 fw-bold">Release Date: </p>
           <p class="lead mb-4"><%= book.description%></p>
-          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center"> 
-                     
+
+          <% console.log("usuarioALoguear", usuarioALoguear); %>
+          <% console.log("categoryId", usuarioALoguear ? usuarioALoguear.CategoryId : null); %>
+
+
+          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <% if (usuarioALoguear && usuarioALoguear.CategoryId === 1) { %>                     
             <button type="button" class="btn btn-primary btn-lg px-4 gap-3">
               <a href="/books/edit/<%=book.id %>" class="btn btn-primary btn-lg px-4 gap-3">Edit</a>
             </button>  
             <form action="/books/<%= book.id %>?_method=delete" method="post" class="btn btn-outline-secondary btn-lg px-4" >                 
               <button type="submit" class="btn btn-outline-secondary btn-lg px-4">Delete</button>
-           </form> 
-                       
+           </form>
+           <% } %>                      
            
           </div>
         </div>
