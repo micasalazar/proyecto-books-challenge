@@ -200,7 +200,7 @@ logout: (req, res) =>{
         return res.status(404).send('Libro no encontrado')
       }
       res.render('editBook',{book, id: req.params.id,  usuarioALoguear:req.session.usuarioALoguear})
-      console.log('Query de Sequelize para obtener el usuario:', query);
+      
     }catch(error){
       console.error('Error al intentar editar un libro ' + error)
       res.status(500).send('Error de Servidor')
@@ -212,16 +212,27 @@ logout: (req, res) =>{
     try{
       const bookFound = await db.Book.findOne({
         where: { id: req.params.id },
-      })
-      await bookFound.update({
-        ...req.body,        
-      },
-         {where: {id: req.params.id}})
-         if (updateBook[0] > 0) {
-             res.redirect('/');
-            } else {
-              res.status(404).send('Libro no encontrado'+ req.params.id);
-            }
+      });
+      
+      if (bookFound) {
+        const updatedBook = await bookFound.update(
+          {
+            title: req.body.title,
+            cover: req.body.cover,
+            description: req.body.description,
+          },
+          { where: { id: req.params.id } }
+        );
+      
+        if (updatedBook) {
+          res.redirect('/');
+        } else {
+          res.status(404).send('Libro no encontrado' + req.params.id);
+        }
+      } else {
+        res.status(404).send('Libro no encontrado' + req.params.id);
+      }
+      
 
     }catch (error) {
         console.error('Error al intentar editar el libro ' + error);
