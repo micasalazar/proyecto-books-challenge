@@ -1,7 +1,7 @@
 function guessMiddleware(req, res, next){
-    if (req.session.userLogueado) {
-        const userLogueado = req.session.userLogueado 
-        return res.redirect('/login'+ userLogueado.id);
+    if (req.session.usuarioALoguear) {
+        const usuarioALoguear = req.session.usuarioALoguear
+        return res.redirect('/login'+ usuarioALoguear.id);
     } 
     next();
 }

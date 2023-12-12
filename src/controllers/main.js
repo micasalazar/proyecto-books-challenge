@@ -1,6 +1,7 @@
 const bcryptjs = require('bcryptjs');
 const db = require('../database/models');
 const {Op} = require('sequelize')
+const sequelize = db.sequelize;
 
 const mainController = {
   home: (req, res) => {
@@ -8,7 +9,7 @@ const mainController = {
       include: [{ association: 'authors' }]
     })
       .then((books) => {
-        res.render('home', { books, userLogueado: req.session.userLogueado  });
+        res.render('home', { books, usuarioALoguear:req.session.usuarioALoguear });
       })
       .catch((error) => console.log(error));
   },
@@ -22,7 +23,7 @@ const mainController = {
         }]
       })
       if(bookFinded){
-        res.render('bookDetail', {book: bookFinded, userLogueado: req.session.userLogueado});        
+        res.render('bookDetail', {book: bookFinded, usuarioALoguear:req.session.usuarioALoguear});        
       }else{
         res.status(404).send('Book not Found!')
       }
@@ -32,7 +33,7 @@ const mainController = {
     }   
   },
   bookSearch: (req, res) => {
-    res.render('search', { books: [], userLogueado: req.session.userLogueado });
+    res.render('search', { books: [], usuarioALoguear:req.session.usuarioALoguear });
   },
   bookSearchResult: async (req, res) => {
     
@@ -50,7 +51,7 @@ const mainController = {
         include:[{association: 'authors'}]
       });
       // console.log('Libros encontrados:', books)
-      res.render('search', {books,userLogueado: req.session.userLogueado  })
+      res.render('search', {books, usuarioALoguear:req.session.usuarioALoguear })
     }catch(error){
       console.error('Error al realizar la búsqueda ' + error);
       res.status(500).send('Error de servidor')
@@ -82,7 +83,7 @@ const mainController = {
   authors: (req, res) => {
     db.Author.findAll()
       .then((authors) => {
-        res.render('authors', { authors, userLogueado: req.session.userLogueado });
+        res.render('authors', { authors, usuarioALoguear:req.session.usuarioALoguear });
       })
       .catch((error) => console.log(error));
   },
@@ -94,7 +95,7 @@ const mainController = {
         include:[{ model: db.Book, as:'books', through:{attributes:[]}}]
       });
       if(author){
-        res.render('authorBooks', {author, userLogueado: req.session.userLogueado});
+        res.render('authorBooks', {author, usuarioALoguear:req.session.usuarioALoguear});
       }else{
         res.status(404).send('El autor no fuen encontrado')
       }
@@ -104,14 +105,14 @@ const mainController = {
     }
     },
   register: (req, res) => {
-    res.render('register', { userLogueado: req.session.userLogueado });
+    res.render('register', { usuarioALoguear:req.session.usuarioALoguear });
   },
   processRegister: (req, res) => {
     db.User.create({
       Name: req.body.name,
       Email: req.body.email,
       Country: req.body.country,
-      Pass: bcryptjs.hashSync(req.body.password, 10),
+      Pass: bcryptjs.hashSync(req.body.pass, 10),
       CategoryId: req.body.category
     })
       .then(() => {
@@ -120,40 +121,70 @@ const mainController = {
       .catch((error) => console.log(error));
   },
   login: (req, res) => {
-    // Implement login process
     
-    return res.render('login', { userLogueado: req.session.userLogueado });
+    
+    return res.render('login', { usuarioALoguear:req.session.usuarioALoguear });
 
   },
-  processLogin: async (req, res) => {
-    try {
-      const userLogin = await db.User.findOne({
-        where: { email: req.body.email } 
-      });
-    
-      if (userLogin) {
-        let passwordOk = bcryptjs.compareSync(req.body.password, userLogin.Pass);
+  processLogin: async (req, res) => { 
+      try {
+        console.log(req.body);
+        console.log(req.session);
 
-        if (passwordOk) {
-            delete userLogin.pass;             
-            req.session.userLogueado = {
-              id: userLogin.id,
-            };
-            res.cookie("email", req.body.email, { maxAge: (4000 * 60) * 10 });
+        const userEmail = req.body.email;
 
-            return res.redirect('/');
-          } else {
-            console.log('Contraseña incorrecta');
-            return res.render('login', { error: 'Contraseña incorrecta' });
-          }
+        if (userEmail) {
+            const usuarioALoguear = await db.User.findOne({
+                where: { email: userEmail }
+            });
+
+            if (usuarioALoguear) {
+                let passOk = bcryptjs.compareSync(req.body.pass, usuarioALoguear.Pass);
+                if (passOk) {
+                    delete usuarioALoguear.Pass;
+                    req.session.usuarioALoguear = usuarioALoguear;
+                    res.cookie("email", userEmail, { maxAge: (4000 * 60) * 10 });
+                    return res.redirect('/');
+                }
+                console.log('Contraseña incorrecta');
+                return res.render('login', { error: 'Contraseña incorrecta' });
+            } else {
+                console.log('Usuario no encontrado');
+                return res.render('login', { error: 'Usuario no encontrado' });
+            }
         } else {
-          console.log('Usuario no encontrado');
-          return res.render('login', { error: 'Usuario no encontrado' });
+            console.log('Email no proporcionado');
+            return res.render('login', { error: 'Email no proporcionado' });
         }
-      } catch (error) {
+    } catch (error) {
         console.error('Error al procesar el inicio de sesión ' + error);
         res.status(500).send('Error del Servidor');
-      }      
+    
+    }
+      //   console.log(req.body);
+      //   console.log(req.session);
+
+      //     const usuarioALoguear = await db.User.findOne({ 
+      //     where: { email: req.body.email }
+      //   }); 
+      //   if(usuarioALoguear){
+      //     let passOk = bcryptjs.compareSync( req.body.pass, usuarioALoguear.Pass);
+      //     if(passOk){
+      //       delete usuarioALoguear.Pass;              
+      //           req.session.usuarioALoguear = usuarioALoguear;
+      //           res.cookie("email", req.body.email, { maxAge: (4000 * 60) * 10 });
+      //           res.redirect('/');
+      //     }
+      //     console.log( 'usuarioALoguear', usuarioALoguear)
+      //   }else{
+      //     console.log('Contraseña incorrecta');
+      //     return res.render('login', { error: 'Contraseña incorrecta' });
+      //   }
+  
+      // } catch (error) {
+      //   console.error('Error al procesar el inicio de sesión ' + error);
+      //   res.status(500).send('Error del Servidor');
+      // }      
 },
 logout: (req, res) =>{
   req.session.destroy();
@@ -168,7 +199,8 @@ logout: (req, res) =>{
       if(!book){
         return res.status(404).send('Libro no encontrado')
       }
-      res.render('editBook',{book, userLogueado: req.session.userLogueado})
+      res.render('editBook',{book, id: req.params.id,  usuarioALoguear:req.session.usuarioALoguear})
+      console.log('Query de Sequelize para obtener el usuario:', query);
     }catch(error){
       console.error('Error al intentar editar un libro ' + error)
       res.status(500).send('Error de Servidor')
@@ -176,24 +208,47 @@ logout: (req, res) =>{
     
   },
   processEdit: async (req, res) => {
-   
-    try{
-      const {title, cover, description}=req.body;
-      const bookId = req.params.id;
 
-      const updateBook = await db.Book.update(
-        {title, cover, description},
-        {where: {id: bookId}}
-      );
-      if(updateBook){
-        res.render('home');        
-      }else{
-        res.status(404).send('Libro no encontrado')
-      }
-    }catch(error){
-      console.error('Error al intentar editar el libro ' + error)
-      res.status(500).send('Error de Servidor')
+    try{
+      const bookFound = await db.Book.findOne({
+        where: { id: req.params.id },
+      })
+      await bookFound.update({
+        ...req.body,        
+      },
+         {where: {id: req.params.id}})
+         if (updateBook[0] > 0) {
+             res.redirect('/');
+            } else {
+              res.status(404).send('Libro no encontrado'+ req.params.id);
+            }
+
+    }catch (error) {
+        console.error('Error al intentar editar el libro ' + error);
+        res.status(500).send('Error de Servidor');
+
     }
+   
+    // try {
+    //   const { title, cover, description } = req.body;
+    //   const bookId = req.params.id;
+
+    
+  
+    //   const updateBook = await db.Book.update(
+    //     { title, cover, description },
+    //     { where: { id: bookId } }
+    //   );
+  
+    //   if (updateBook[0] > 0) {
+    //     res.redirect('/');
+    //   } else {
+    //     res.status(404).send('Libro no encontrado'+ req.params.id);
+    //   }
+    // } catch (error) {
+    //   console.error('Error al intentar editar el libro ' + error);
+    //   res.status(500).send('Error de Servidor');
+    // }
     
     
 

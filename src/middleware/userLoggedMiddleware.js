@@ -1,13 +1,15 @@
-function userLoggedMiddleware(req, res, next){
-    res.locals.isLogged = false;
+function userLoggedMiddleware(req, res, next) {
+    res.locals.usuarioALoguear = false;
 
-    if(req.session.userLogueado){
-        res.locals.isLogged =true;
-        res.locals.userLogueado = req.session.userLogueado;
+    if (req.session.usuarioALoguear) {
+        res.locals.usuarioALoguear = req.session.usuarioALoguear;
     }
-    console.log('userLogueado structure:', res.locals.userLogueado);
-    console.log('session.userLogueado:', req.session);
-    next()
+
+    console.log('userLogueado structure:', res.locals.usuarioALoguear);
+    console.log('session.userLogueado:', req.session.usuarioALoguear);
+
+    next();
 }
+
 
 module.exports = userLoggedMiddleware;

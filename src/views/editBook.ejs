@@ -11,7 +11,7 @@
 </head>
 <body>
   <div class="container">
-  <%- include('partials/header.ejs', { userLogueado: userLogueado }) %>
+  <%- include('partials/header.ejs') %>
   <section class="vh-100" style="background-color: #2779e2;">
     <div class="container h-100">
       <div class="row d-flex justify-content-center align-items-center h-100">
@@ -19,7 +19,10 @@
   
           <h1 class="text-white mb-4">Edit book <%=book.id %> </h1>
   
-          <form action="/books/edit/<%=book.id %> " method="POST" class="card" style="border-radius: 15px;">
+          <!-- <form action="/books/edit/<%=book.id %>?_method=put " method="POST" class="card" style="border-radius: 15px;" enctype="multipart/form-data"> -->
+            <form action="/books/edit/<%=book.id %>" method="POST" class="card" style="border-radius: 15px;" enctype="multipart/form-data">
+              <input type="hidden" name="_method" value="PUT">
+
             <div class="card-body">
   
               <div class="row align-items-center pt-4 pb-3">
@@ -30,7 +33,7 @@
                 </div>
                 <div class="col-md-9 pe-5">
   
-                  <input type="text" name="title" class="form-control form-control-lg" />
+                  <input type="text" name="title" class="form-control form-control-lg" value="<%=book.title%>"  />
   
                 </div>
               </div>
@@ -45,7 +48,7 @@
                 </div>
                 <div class="col-md-9 pe-5">
   
-                  <input type="text" name="cover" class="form-control form-control-lg" />
+                  <input type="text" name="cover" class="form-control form-control-lg" value="<%= book.cover%>"  />
   
                 </div>
               </div>
@@ -60,7 +63,7 @@
                 </div>
                 <div class="col-md-9 pe-5">
   
-                  <input type="text" name="description" class="form-control form-control-lg" />
+                  <input type="text" name="description" class="form-control form-control-lg" value="<%= book.description%>"/>
   
                 </div>
               </div>

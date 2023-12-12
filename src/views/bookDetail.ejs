@@ -9,7 +9,7 @@
 </head>
 <body>
   <div class="container">
-    <%- include('partials/header.ejs',{ userLogueado: userLogueado }) %>
+    <%- include('partials/header.ejs') %>
 
     <div class="container">
       <div class="px-4 py-5 my-5 text-center">
@@ -28,7 +28,7 @@
               <a href="/books/edit/<%=book.id %>" class="btn btn-primary btn-lg px-4 gap-3">Edit</a>
             </button>  
             <form action="/books/<%= book.id %>?_method=delete" method="post" class="btn btn-outline-secondary btn-lg px-4" >                 
-              <button type="submit" class="btn btn-outline-secondary btn-lg px-4" onclick="return confirm('¿Estás seguro que deseas borrar el libro?')">Delete</button>
+              <button type="submit" class="btn btn-outline-secondary btn-lg px-4">Delete</button>
            </form> 
                        
            
